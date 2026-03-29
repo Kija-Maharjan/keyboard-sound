@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Key Sound — by Kija Maharjan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --black:   #080808;
+      --dark:    #111111;
+      --card:    #161616;
+      --border:  #2a2a2a;
+      --gold:    #c9a84c;
+      --gold-lt: #e8c97a;
+      --gold-dk: #8a6e2f;
+      --text:    #e8e0d0;
+      --sub:     #888070;
+      --white:   #f5f0e8;
+      --r:       4px;
+      --mono:    'DM Mono', monospace;
+      --serif:   'Cormorant Garamond', Georgia, serif;
+      --sans:    'Outfit', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--black); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.7; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 9999; opacity: 0.4; }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 20px 60px; background: rgba(8,8,8,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(201,168,76,0.12); }
+    .nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--gold); letter-spacing: 0.02em; text-decoration: none; }
+    .nav-logo span { font-style: italic; color: var(--white); }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a { color: var(--sub); text-decoration: none; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--gold); }
+
+    #hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 120px 40px 80px; position: relative; overflow: hidden; }
+    #hero::before { content: ''; position: absolute; top: 30%; left: 50%; transform: translate(-50%,-50%); width: 600px; height: 600px; background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%); pointer-events: none; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(201,168,76,0.3); border-radius: 100px; padding: 6px 18px; font-size: 12px; font-family: var(--mono); color: var(--gold); letter-spacing: 0.1em; margin-bottom: 32px; background: rgba(201,168,76,0.05); animation: fadeUp 0.8s ease both; }
+    .hero-badge::before { content: '◆'; font-size: 8px; }
+    h1 { font-family: var(--serif); font-size: clamp(56px,9vw,110px); font-weight: 300; line-height: 1.0; letter-spacing: -0.02em; color: var(--white); animation: fadeUp 0.8s 0.1s ease both; }
+    h1 em { font-style: italic; color: var(--gold); }
+    .hero-sub { max-width: 520px; margin: 24px auto 0; color: var(--sub); font-size: 16px; font-weight: 300; animation: fadeUp 0.8s 0.2s ease both; }
+    .hero-buttons { display: flex; gap: 14px; margin-top: 48px; flex-wrap: wrap; justify-content: center; animation: fadeUp 0.8s 0.3s ease both; }
+    .btn-primary { background: var(--gold); color: var(--black); border: none; border-radius: var(--r); padding: 14px 32px; font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; text-decoration: none; transition: background 0.2s, transform 0.15s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary:hover { background: var(--gold-lt); transform: translateY(-2px); }
+    .btn-outline { background: transparent; color: var(--gold); border: 1px solid rgba(201,168,76,0.4); border-radius: var(--r); padding: 14px 32px; font-family: var(--sans); font-size: 13px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; text-decoration: none; transition: border-color 0.2s, background 0.2s, transform 0.15s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-outline:hover { border-color: var(--gold); background: rgba(201,168,76,0.06); transform: translateY(-2px); }
+    .hero-keyboard { margin-top: 72px; animation: fadeUp 0.8s 0.4s ease both; }
+    .keyboard { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px 28px; display: inline-flex; flex-direction: column; gap: 8px; box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.06); }
+    .key-row { display: flex; gap: 6px; }
+    .key { background: #1e1e1e; border: 1px solid #2e2e2e; border-bottom: 3px solid #141414; border-radius: 5px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; color: var(--sub); cursor: default; user-select: none; }
+    .key.wide { width: 58px; } .key.wider { width: 80px; } .key.space { width: 200px; }
+    .key.lit { background: #1e1a0e; border-color: var(--gold-dk); border-bottom-color: #0e0d08; color: var(--gold); }
+    .key.pressed { transform: translateY(2px); border-bottom-width: 1px; background: #2a2310; color: var(--gold-lt); }
+
+    section { padding: 100px 60px; max-width: 1100px; margin: 0 auto; }
+    .section-tag { font-family: var(--mono); font-size: 11px; color: var(--gold); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+    .section-tag::before { content: ''; display: block; width: 32px; height: 1px; background: var(--gold); }
+    h2 { font-family: var(--serif); font-size: clamp(36px,5vw,58px); font-weight: 300; line-height: 1.1; color: var(--white); margin-bottom: 20px; }
+    h2 em { font-style: italic; color: var(--gold); }
+
+    #downloads { border-top: 1px solid var(--border); }
+    .download-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 52px; }
+    .download-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 36px 32px; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.2s; }
+    .download-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg,transparent,var(--gold),transparent); opacity: 0; transition: opacity 0.3s; }
+    .download-card:hover { border-color: rgba(201,168,76,0.3); transform: translateY(-4px); }
+    .download-card:hover::before { opacity: 1; }
+    .card-icon { font-size: 36px; margin-bottom: 20px; }
+    .card-title { font-family: var(--serif); font-size: 26px; font-weight: 400; color: var(--white); margin-bottom: 8px; }
+    .card-desc { color: var(--sub); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
+    .card-tag { display: inline-block; font-family: var(--mono); font-size: 10px; color: var(--gold-dk); background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.15); border-radius: 3px; padding: 3px 8px; letter-spacing: 0.1em; margin-bottom: 20px; }
+    .card-btn { display: flex; align-items: center; gap: 8px; background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.25); border-radius: var(--r); color: var(--gold); font-family: var(--sans); font-size: 12px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; padding: 11px 20px; cursor: pointer; text-decoration: none; transition: background 0.2s, border-color 0.2s; width: fit-content; }
+    .card-btn:hover { background: rgba(201,168,76,0.18); border-color: var(--gold); }
+
+    #sounds { border-top: 1px solid var(--border); }
+    .sounds-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; margin-top: 52px; }
+    .sound-chip { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 16px; text-align: center; transition: border-color 0.2s, background 0.2s; cursor: pointer; }
+    .sound-chip:hover { border-color: rgba(201,168,76,0.3); background: #1a1a0f; }
+    .sound-chip .chip-icon { font-size: 24px; margin-bottom: 8px; }
+    .sound-chip .chip-name { font-size: 13px; font-weight: 500; color: var(--text); }
+
+    #docs { border-top: 1px solid var(--border); }
+    .docs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin-top: 52px; }
+    .doc-block h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; color: var(--white); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+    .doc-steps { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .doc-steps li { display: flex; gap: 14px; align-items: flex-start; font-size: 14px; color: var(--sub); line-height: 1.6; }
+    .step-num { flex-shrink: 0; width: 24px; height: 24px; background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; color: var(--gold); margin-top: 2px; }
+    .code-block { background: #0e0e0e; border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: var(--r); padding: 14px 18px; font-family: var(--mono); font-size: 12px; color: var(--gold-lt); margin-top: 14px; overflow-x: auto; white-space: nowrap; }
+
+    /* ══ REVIEWS ══ */
+    #reviews { border-top: 1px solid var(--border); }
+    .review-form-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 48px; margin-top: 52px; position: relative; overflow: hidden; }
+    .review-form-wrap::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.04) 0%, transparent 60%); pointer-events: none; }
+    .review-tabs { display: flex; gap: 8px; margin-bottom: 36px; border-bottom: 1px solid var(--border); }
+    .review-tab { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sub); padding: 10px 20px; cursor: pointer; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.2s, border-color 0.2s; background: none; }
+    .review-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .review-panel { display: none; }
+    .review-panel.active { display: block; }
+    .star-row { display: flex; gap: 6px; margin-bottom: 20px; }
+    .star-btn { font-size: 28px; cursor: pointer; color: var(--border); transition: color 0.15s, transform 0.1s; background: none; border: none; padding: 0; line-height: 1; }
+    .star-btn.active { color: var(--gold); transform: scale(1.15); }
+    .nps-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .nps-btn { width: 44px; height: 44px; background: var(--dark); border: 1px solid var(--border); border-radius: 6px; color: var(--sub); font-family: var(--mono); font-size: 13px; cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+    .nps-btn:hover, .nps-btn.active { background: rgba(201,168,76,0.15); border-color: var(--gold); color: var(--gold); }
+    .nps-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--sub); font-family: var(--mono); margin-bottom: 20px; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+    .form-input, .form-textarea { width: 100%; background: #0e0e0e; border: 1px solid var(--border); border-radius: var(--r); color: var(--text); font-family: var(--sans); font-size: 14px; padding: 12px 16px; transition: border-color 0.2s; outline: none; resize: vertical; }
+    .form-input:focus, .form-textarea:focus { border-color: rgba(201,168,76,0.4); }
+    .form-textarea { min-height: 100px; }
+    .form-submit { background: var(--gold); color: var(--black); border: none; border-radius: var(--r); padding: 13px 32px; font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: background 0.2s, transform 0.15s; margin-top: 8px; }
+    .form-submit:hover { background: var(--gold-lt); transform: translateY(-1px); }
+    .form-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .form-msg { margin-top: 14px; padding: 12px 16px; border-radius: var(--r); font-size: 13px; font-family: var(--mono); display: none; }
+    .form-msg.success { background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2); color: #4ade80; display: block; }
+    .form-msg.error   { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2); color: #f87171; display: block; }
+    .reviews-list { margin-top: 52px; }
+    .reviews-list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .reviews-list-header h3 { font-family: var(--serif); font-size: 24px; font-weight: 300; color: var(--white); }
+    .review-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px 32px; margin-bottom: 16px; transition: border-color 0.2s; }
+    .review-card:hover { border-color: rgba(201,168,76,0.2); }
+    .review-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+    .reviewer-name { font-weight: 500; color: var(--white); font-size: 15px; }
+    .review-date { font-family: var(--mono); font-size: 11px; color: var(--sub); }
+    .review-stars { color: var(--gold); font-size: 14px; margin-bottom: 4px; }
+    .review-nps-badge { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 11px; background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.2); border-radius: 4px; padding: 2px 8px; color: var(--gold); margin-bottom: 6px; }
+    .review-type-badge { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; background: rgba(201,168,76,0.06); border: 1px solid rgba(201,168,76,0.15); color: var(--gold-dk); }
+    .review-body { color: var(--sub); font-size: 14px; line-height: 1.65; }
+    .reviews-empty { text-align: center; color: var(--sub); font-family: var(--mono); font-size: 13px; padding: 52px 0; }
+
+    /* Support */
+    #support { border-top: 1px solid var(--border); }
+    .support-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 52px; }
+    .support-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 32px 28px; transition: border-color 0.2s; }
+    .support-card:hover { border-color: rgba(201,168,76,0.25); }
+    .support-icon { font-size: 28px; margin-bottom: 16px; }
+    .support-card h3 { font-family: var(--serif); font-size: 20px; font-weight: 400; color: var(--white); margin-bottom: 8px; }
+    .support-card p { color: var(--sub); font-size: 14px; margin-bottom: 20px; }
+    .support-link { color: var(--gold); text-decoration: none; font-size: 13px; font-family: var(--mono); display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+    .support-link:hover { color: var(--gold-lt); }
+    .support-link::after { content: '→'; }
+
+    /* ══ DONATE ══ */
+    #donate { border-top: 1px solid var(--border); text-align: center; }
+    #donate section { display: flex; flex-direction: column; align-items: center; }
+    .donate-box { margin-top: 52px; background: var(--card); border: 1px solid rgba(201,168,76,0.2); border-radius: 16px; padding: 52px 60px; max-width: 680px; width: 100%; position: relative; overflow: hidden; }
+    .donate-box::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 60%); pointer-events: none; }
+    .donate-icon { font-size: 48px; margin-bottom: 20px; }
+    .donate-box h3 { font-family: var(--serif); font-size: 32px; font-weight: 300; color: var(--white); margin-bottom: 12px; }
+    .donate-box h3 em { font-style: italic; color: var(--gold); }
+    .donate-box p { color: var(--sub); font-size: 15px; margin-bottom: 32px; max-width: 420px; margin-left: auto; margin-right: auto; }
+    .qr-wrap { background: #fff; border-radius: 12px; padding: 16px; display: inline-block; margin: 0 auto 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+    .qr-wrap img { width: 220px; height: auto; display: block; border-radius: 4px; }
+    .bank-info { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(201,168,76,0.06); border: 1px solid rgba(201,168,76,0.15); border-radius: 8px; padding: 14px 28px; margin-top: 4px; }
+    .bank-name-label { font-family: var(--mono); font-size: 11px; color: var(--sub); letter-spacing: 0.12em; text-transform: uppercase; }
+    .bank-account-name { font-family: var(--serif); font-size: 20px; color: var(--white); font-weight: 400; }
+    .bank-account-num { font-family: var(--mono); font-size: 13px; color: var(--gold); letter-spacing: 0.06em; }
+    .donate-note { margin-top: 20px; font-size: 12px; color: var(--sub); font-family: var(--mono); }
+
+    /* Author */
+    #author { border-top: 1px solid var(--border); }
+    .author-inner { display: flex; align-items: center; gap: 52px; margin-top: 52px; }
+    .author-avatar { width: 140px; height: 140px; border-radius: 50%; background: var(--card); border: 2px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 48px; color: var(--gold); flex-shrink: 0; font-style: italic; }
+    .author-info h3 { font-family: var(--serif); font-size: 32px; font-weight: 300; color: var(--white); margin-bottom: 4px; }
+    .author-info h3 em { font-style: italic; color: var(--gold); }
+    .author-role { font-family: var(--mono); font-size: 12px; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 16px; }
+    .author-bio { color: var(--sub); font-size: 14px; max-width: 480px; margin-bottom: 24px; }
+    .author-links { display: flex; gap: 14px; }
+    .author-link { color: var(--sub); text-decoration: none; font-size: 13px; font-family: var(--mono); border: 1px solid var(--border); border-radius: var(--r); padding: 8px 16px; transition: color 0.2s, border-color 0.2s; }
+    .author-link:hover { color: var(--gold); border-color: rgba(201,168,76,0.3); }
+
+    footer { border-top: 1px solid var(--border); padding: 36px 60px; display: flex; align-items: center; justify-content: space-between; color: var(--sub); font-size: 13px; }
+    .footer-logo { font-family: var(--serif); font-size: 18px; color: var(--gold); }
+    .footer-logo span { font-style: italic; color: var(--sub); }
+    .footer-links { display: flex; gap: 28px; }
+    .footer-links a { color: var(--sub); text-decoration: none; font-size: 12px; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--gold); }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 900px) {
+      nav { padding: 16px 24px; } .nav-links { display: none; }
+      section { padding: 60px 24px; }
+      .download-grid, .support-grid { grid-template-columns: 1fr; }
+      .sounds-grid { grid-template-columns: repeat(2,1fr); }
+      .docs-grid { grid-template-columns: 1fr; }
+      .author-inner { flex-direction: column; gap: 28px; }
+      footer { flex-direction: column; gap: 20px; text-align: center; }
+      .footer-links { flex-wrap: wrap; justify-content: center; }
+      .review-form-wrap { padding: 28px 20px; }
+      .donate-box { padding: 36px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">Key <span>Sound</span></a>
+  <ul class="nav-links">
+    <li><a href="#downloads">Download</a></li>
+    <li><a href="#sounds">Sounds</a></li>
+    <li><a href="#docs">Docs</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+    <li><a href="#support">Support</a></li>
+    <li><a href="#donate">Donate</a></li>
+    <li><a href="#author">Author</a></li>
+  </ul>
+</nav>
+
+<div id="hero">
+  <div class="hero-badge">Open Source · v1.0</div>
+  <h1>Make Every<br/><em>Keystroke</em> Count</h1>
+  <p class="hero-sub">Mechanical keyboard sounds for your browser, desktop, and code editor. Hand-picked from real switches.</p>
+  <div class="hero-buttons">
+    <a href="#downloads" class="btn-primary">⬇ Download Now</a>
+    <a href="https://github.com/Kija-Maharjan" target="_blank" class="btn-outline">⭐ GitHub</a>
+  </div>
+  <div class="hero-keyboard">
+    <div class="keyboard">
+      <div class="key-row">
+        <div class="key lit">Q</div><div class="key">W</div><div class="key lit">E</div><div class="key">R</div><div class="key">T</div><div class="key lit">Y</div><div class="key">U</div><div class="key lit">I</div><div class="key">O</div><div class="key">P</div>
+      </div>
+      <div class="key-row">
+        <div class="key wider">Caps</div><div class="key lit">A</div><div class="key">S</div><div class="key lit pressed">D</div><div class="key">F</div><div class="key">G</div><div class="key lit">H</div><div class="key">J</div><div class="key lit">K</div><div class="key">L</div>
+      </div>
+      <div class="key-row">
+        <div class="key wide">Shift</div><div class="key">Z</div><div class="key lit">X</div><div class="key">C</div><div class="key lit">V</div><div class="key">B</div><div class="key lit">N</div><div class="key">M</div><div class="key wide">Shift</div>
+      </div>
+      <div class="key-row" style="justify-content:center;">
+        <div class="key space lit">— Key Sound Active —</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="downloads">
+  <section>
+    <div class="section-tag">Get It</div>
+    <h2>Choose Your <em>Platform</em></h2>
+    <p style="color:var(--sub);max-width:480px;">Available for three platforms — pick the one that fits your workflow.</p>
+    <div class="download-grid">
+      <div class="download-card">
+        <div class="card-icon">🐧</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+          <div class="card-tag" style="margin-bottom:0;">GNOME Shell · Linux</div>
+          <div class="card-tag" style="margin-bottom:0;color:#f59e0b;border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.08);">⚠ WIP</div>
+        </div>
+        <div class="card-title">GNOME Extension</div>
+        <div class="card-desc">System-wide keyboard sounds on every keystroke. Works with GNOME 43–48. <span style="color:#f59e0b;font-size:12px;">Still being fixed — some issues remain.</span></div>
+        <a href="https://github.com/Kija-Maharjan/key-sound-gnome" target="_blank" class="card-btn">⭐ View on GitHub</a>
+      </div>
+      <div class="download-card">
+        <div class="card-icon">🌐</div>
+        <div class="card-tag">Brave · Chrome · Chromium</div>
+        <div class="card-title">Browser Extension</div>
+        <div class="card-desc">Typing sounds in your browser as you fill forms, write emails, or chat. Load unpacked in seconds.</div>
+        <a href="https://github.com/Kija-Maharjan/keyboard-sound-extension" target="_blank" class="card-btn">⭐ View on GitHub</a>
+      </div>
+      <div class="download-card">
+        <div class="card-icon">💻</div>
+        <div class="card-tag">VS Code · Cursor · Codium</div>
+        <div class="card-title">VS Code Extension</div>
+        <div class="card-desc">Satisfying click sounds while you code. Includes a built-in sound picker panel and volume control.</div>
+        <a href="https://github.com/Kija-Maharjan/keyboard-sound-extension-vs_code" target="_blank" class="card-btn">⭐ View on GitHub</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="sounds">
+  <section>
+    <div class="section-tag">Sound Library</div>
+    <h2>10 Hand-Picked <em>Switches</em></h2>
+    <p style="color:var(--sub);max-width:520px;">Every sound was personally sourced from real mechanical keyboard recordings.</p>
+    <div class="sounds-grid">
+      <div class="sound-chip" onclick="playSound('click1')"><div class="chip-icon">🌸</div><div class="chip-name">Osu</div></div>
+      <div class="sound-chip" onclick="playSound('click2')"><div class="chip-icon">🔥</div><div class="chip-name">Hitokage</div></div>
+      <div class="sound-chip" onclick="playSound('click3')"><div class="chip-icon">⚙️</div><div class="chip-name">Semimecha</div></div>
+      <div class="sound-chip" onclick="playSound('click4')"><div class="chip-icon">🧈</div><div class="chip-name">Lubed</div></div>
+      <div class="sound-chip" onclick="playSound('click5')"><div class="chip-icon">🎵</div><div class="chip-name">Nk Cream</div></div>
+      <div class="sound-chip" onclick="playSound('click6')"><div class="chip-icon">💎</div><div class="chip-name">Topre</div></div>
+      <div class="sound-chip" onclick="playSound('click7')"><div class="chip-icon">🖤</div><div class="chip-name">Mx Black</div></div>
+      <div class="sound-chip" onclick="playSound('click14')"><div class="chip-icon">🌙</div><div class="chip-name">Stealth</div></div>
+      <div class="sound-chip" onclick="playSound('click15')"><div class="chip-icon">🌸</div><div class="chip-name">Box Pink</div></div>
+      <div class="sound-chip" onclick="playSound('click16')"><div class="chip-icon">💛</div><div class="chip-name">Gateron Yellow</div></div>
+    </div>
+  </section>
+</div>
+
+<div id="docs">
+  <section>
+    <div class="section-tag">Documentation</div>
+    <h2>Install &amp; <em>Use</em></h2>
+    <p style="color:var(--sub);max-width:520px;">Step-by-step guides for every platform.</p>
+
+    <div style="margin-top:52px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
+        <span style="font-size:28px;">🐧</span>
+        <div>
+          <div style="font-family:var(--serif);font-size:26px;font-weight:400;color:var(--white);">GNOME Extension <span style="font-size:13px;font-family:var(--sans);color:#f59e0b;margin-left:10px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);border-radius:4px;padding:2px 10px;">⚠ Work in Progress</span></div>
+          <div style="color:var(--sub);font-size:13px;margin-top:2px;">System-wide sounds on Linux · GNOME 43–48</div>
+        </div>
+      </div>
+      <div class="docs-grid">
+        <div class="doc-block">
+          <h3><span>📦</span> Installation</h3>
+          <ol class="doc-steps">
+            <li><span class="step-num">1</span>Go to the <a href="https://github.com/Kija-Maharjan/key-sound-gnome" target="_blank" style="color:var(--gold);">GitHub repo</a> and click <strong style="color:var(--text);">Code → Download ZIP</strong></li>
+            <li><span class="step-num">2</span>Extract the ZIP on your computer</li>
+            <li><span class="step-num">3</span>Rename the folder to: <div class="code-block">keysound@kija-maharjan.github.com</div></li>
+            <li><span class="step-num">4</span>Move it to: <div class="code-block">~/.local/share/gnome-shell/extensions/</div></li>
+            <li><span class="step-num">5</span>Restart GNOME Shell: <div class="code-block">Alt+F2 → type r → press Enter</div></li>
+            <li><span class="step-num">6</span>Open <strong style="color:var(--text);">GNOME Extensions</strong> app and enable <strong style="color:var(--text);">Key Sound</strong></li>
+          </ol>
+        </div>
+        <div class="doc-block">
+          <h3><span>🎮</span> How to Use</h3>
+          <ol class="doc-steps">
+            <li><span class="step-num">1</span>Sounds play automatically on every key press system-wide</li>
+            <li><span class="step-num">2</span>Click the <strong style="color:var(--text);">Key Sound toggle</strong> in GNOME Quick Settings</li>
+            <li><span class="step-num">3</span>Choose a <strong style="color:var(--text);">sound style</strong> from the menu</li>
+            <li><span class="step-num">4</span>Use <strong style="color:var(--text);">volume − / +</strong> to adjust loudness</li>
+          </ol>
+          <div style="margin-top:16px;padding:14px 16px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;font-size:13px;color:#f59e0b;">
+            ⚠ Check <a href="https://github.com/Kija-Maharjan/key-sound-gnome/issues" target="_blank" style="color:#f59e0b;text-decoration:underline;">GitHub Issues</a> for known problems.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin:52px 0;"></div>
+
+    <div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
+        <span style="font-size:28px;">🌐</span>
+        <div>
+          <div style="font-family:var(--serif);font-size:26px;font-weight:400;color:var(--white);">Browser Extension</div>
+          <div style="color:var(--sub);font-size:13px;margin-top:2px;">Brave · Chrome · Any Chromium browser</div>
+        </div>
+      </div>
+      <div class="docs-grid">
+        <div class="doc-block">
+          <h3><span>📦</span> Installation</h3>
+          <ol class="doc-steps">
+            <li><span class="step-num">1</span><a href="https://github.com/Kija-Maharjan/keyboard-sound-extension" target="_blank" style="color:var(--gold);">GitHub repo</a> → <strong style="color:var(--text);">Code → Download ZIP</strong></li>
+            <li><span class="step-num">2</span>Extract the ZIP anywhere</li>
+            <li><span class="step-num">3</span>Open: <div class="code-block">brave://extensions  or  chrome://extensions</div></li>
+            <li><span class="step-num">4</span>Enable <strong style="color:var(--text);">Developer Mode</strong></li>
+            <li><span class="step-num">5</span>Click <strong style="color:var(--text);">Load Unpacked</strong> → select folder</li>
+          </ol>
+        </div>
+        <div class="doc-block">
+          <h3><span>🎮</span> How to Use</h3>
+          <ol class="doc-steps">
+            <li><span class="step-num">1</span>Click the <strong style="color:var(--text);">⌨️ icon</strong> in your toolbar</li>
+            <li><span class="step-num">2</span>Toggle <strong style="color:var(--text);">ON / OFF</strong></li>
+            <li><span class="step-num">3</span>Drag the <strong style="color:var(--text);">volume slider</strong></li>
+            <li><span class="step-num">4</span>Click a <strong style="color:var(--text);">sound style</strong> to switch</li>
+          </ol>
+          <div style="margin-top:16px;padding:14px 16px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);border-radius:6px;font-size:13px;color:var(--sub);">💡 Works best on Linux. Windows experimental. Mac untested.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin:52px 0;"></div>
+
+    <div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
+        <span style="font-size:28px;">💻</span>
+        <div>
+          <div style="font-family:var(--serif);font-size:26px;font-weight:400;color:var(--white);">VS Code Extension</div>
+          <div style="color:var(--sub);font-size:13px;margin-top:2px;">VS Code · Cursor · VSCodium · Linux · macOS · Windows</div>
+        </div>
+      </div>
+      <div class="docs-grid">
+        <div class="doc-block">
+          <h3><span>📦</span> Installation</h3>
+          <ol class="doc-steps">
+            <li><span class="step-num">1</span>Download the <code style="color:var(--gold);font-family:var(--mono);font-size:12px;">.vsix</code> from the <a href="https://github.com/Kija-Maharjan/keyboard-sound-extension-vs_code" target="_blank" style="color:var(--gold);">GitHub repo</a></li>
+            <li><span class="step-num">2</span>Open VS Code: <div class="code-block">Ctrl+Shift+P  (Cmd+Shift+P on Mac)</div></li>
+            <li><span class="step-num">3</span>Run: <strong style="color:var(--text);">Extensions: Install from VSIX</strong></li>
+            <li><span class="step-num">4</span>Select the <code style="color:var(--gold);font-family:var(--mono);font-size:12px;">.vsix</code> file and reload</li>
+          </ol>
+          <div class="code-block" style="margin-top:14px;"># Or via terminal:<br>code --install-extension keyboard-sound-1.1.0.vsix</div>
+        </div>
+        <div class="doc-block">
+          <h3><span>🎮</span> How to Use</h3>
+          <ol class="doc-steps">
+            <li><span class="step-num">1</span>Sounds play automatically as you type</li>
+            <li><span class="step-num">2</span>Check the <strong style="color:var(--text);">bottom-right status bar</strong></li>
+            <li><span class="step-num">3</span>Click it to open the sound picker panel</li>
+            <li><span class="step-num">4</span>Or: <div class="code-block">Ctrl+Shift+P → Key Sound: ...</div></li>
+          </ol>
+          <div style="margin-top:16px;padding:14px 16px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);border-radius:6px;font-size:13px;color:var(--sub);">
+            💡 Linux needs <code style="color:var(--gold);font-family:var(--mono);">aplay</code>. macOS: <code style="color:var(--gold);font-family:var(--mono);">afplay</code>. Windows: PowerShell.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ══ REVIEWS ══ -->
+<div id="reviews">
+  <section>
+    <div class="section-tag">Community</div>
+    <h2>Reviews &amp; <em>Feedback</em></h2>
+    <p style="color:var(--sub);max-width:520px;">Enjoyed Key Sound? Share your experience — every review helps the project grow.</p>
+
+    <div class="review-form-wrap">
+      <div class="review-tabs">
+        <button class="review-tab active" onclick="switchTab(this,'star')">⭐ Star Review</button>
+        <button class="review-tab" onclick="switchTab(this,'nps')">📊 NPS Score</button>
+        <button class="review-tab" onclick="switchTab(this,'text')">💬 Comment</button>
+      </div>
+
+      <!-- Star -->
+      <div id="tab-star" class="review-panel active">
+        <div class="form-group">
+          <label>Your Rating</label>
+          <div class="star-row">
+            <button class="star-btn" onclick="setStar(1)">★</button>
+            <button class="star-btn" onclick="setStar(2)">★</button>
+            <button class="star-btn" onclick="setStar(3)">★</button>
+            <button class="star-btn" onclick="setStar(4)">★</button>
+            <button class="star-btn" onclick="setStar(5)">★</button>
+          </div>
+        </div>
+        <div class="form-group"><label>Your Name</label><input class="form-input" id="star-name" placeholder="e.g. Alex K." /></div>
+        <div class="form-group"><label>Your Review</label><textarea class="form-textarea" id="star-body" placeholder="What did you think of Key Sound?"></textarea></div>
+        <button class="form-submit" onclick="submitReview('star',this)">Submit Review</button>
+        <div class="form-msg" id="star-msg"></div>
+      </div>
+
+      <!-- NPS -->
+      <div id="tab-nps" class="review-panel">
+        <div class="form-group">
+          <label>How likely are you to recommend Key Sound? (0–10)</label>
+          <div class="nps-row">
+            <button class="nps-btn" onclick="setNps(this,0)">0</button><button class="nps-btn" onclick="setNps(this,1)">1</button><button class="nps-btn" onclick="setNps(this,2)">2</button><button class="nps-btn" onclick="setNps(this,3)">3</button><button class="nps-btn" onclick="setNps(this,4)">4</button><button class="nps-btn" onclick="setNps(this,5)">5</button><button class="nps-btn" onclick="setNps(this,6)">6</button><button class="nps-btn" onclick="setNps(this,7)">7</button><button class="nps-btn" onclick="setNps(this,8)">8</button><button class="nps-btn" onclick="setNps(this,9)">9</button><button class="nps-btn" onclick="setNps(this,10)">10</button>
+          </div>
+          <div class="nps-labels"><span>Not likely</span><span>Extremely likely</span></div>
+        </div>
+        <div class="form-group"><label>Your Name</label><input class="form-input" id="nps-name" placeholder="e.g. Alex K." /></div>
+        <div class="form-group"><label>Any comments? (optional)</label><textarea class="form-textarea" id="nps-body" placeholder="What made you choose that score?"></textarea></div>
+        <button class="form-submit" onclick="submitReview('nps',this)">Submit Score</button>
+        <div class="form-msg" id="nps-msg"></div>
+      </div>
+
+      <!-- Text -->
+      <div id="tab-text" class="review-panel">
+        <div class="form-group"><label>Your Name</label><input class="form-input" id="text-name" placeholder="e.g. Alex K." /></div>
+        <div class="form-group"><label>Your Comment</label><textarea class="form-textarea" id="text-body" placeholder="Share your thoughts or just say hi!"></textarea></div>
+        <button class="form-submit" onclick="submitReview('text',this)">Submit Comment</button>
+        <div class="form-msg" id="text-msg"></div>
+      </div>
+    </div>
+
+    <div class="reviews-list">
+      <div class="reviews-list-header">
+        <h3>What people are saying</h3>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--sub);" id="review-count"></span>
+      </div>
+      <div id="reviews-container"><div class="reviews-empty">Loading reviews…</div></div>
+    </div>
+  </section>
+</div>
+
+<!-- Support -->
+<div id="support">
+  <section>
+    <div class="section-tag">Support</div>
+    <h2>Need <em>Help?</em></h2>
+    <p style="color:var(--sub);max-width:480px;">Something not working? Have a feature idea?</p>
+    <div class="support-grid">
+      <div class="support-card">
+        <div class="support-icon">🐛</div>
+        <h3>Bug Reports</h3>
+        <p>Found something broken? Open an issue on GitHub with your OS and version.</p>
+        <a href="https://github.com/Kija-Maharjan/key-sound-gnome/issues" target="_blank" class="support-link">Open an Issue</a>
+      </div>
+      <div class="support-card">
+        <div class="support-icon">💡</div>
+        <h3>Feature Requests</h3>
+        <p>Have an idea for a new sound or feature? Submit it as a GitHub issue.</p>
+        <a href="https://github.com/Kija-Maharjan/key-sound-gnome/issues" target="_blank" class="support-link">Suggest a Feature</a>
+      </div>
+      <div class="support-card">
+        <div class="support-icon">✉️</div>
+        <h3>Direct Contact</h3>
+        <p>For anything else, reach out by email. Response within 1–2 days.</p>
+        <a href="mailto:kija@example.com" class="support-link">Send an Email</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ══ DONATE — Siddhartha Bank QR ══ -->
+<div id="donate">
+  <section style="display:flex;flex-direction:column;align-items:center;">
+    <div class="section-tag" style="margin:0 auto;">Support the Project</div>
+    <h2 style="text-align:center;">Support via <em>Bank Transfer</em></h2>
+    <div class="donate-box">
+      <div class="donate-icon">🏦</div>
+      <h3>Enjoyed Key <em>Sound?</em></h3>
+      <p>This project is free and open source. If it made your typing more fun, a small contribution goes a long way — scan the QR with any Nepali banking app.</p>
+      <div class="qr-wrap">
+        <img src="siddhartha-qr.jpeg" alt="Siddhartha Bank QR — Biplop Maharjan" />
+      </div>
+      <div class="bank-info">
+        <div class="bank-name-label">Siddhartha Bank · Gen-Z Saving Account</div>
+        <div class="bank-account-name">Biplop Maharjan</div>
+        <div class="bank-account-num">Account No: 55510583765</div>
+      </div>
+      <div class="donate-note">Scan with Siddhartha Bank app, eSewa, Khalti, or any QR payment app<br/>100% goes toward development &amp; new sounds</div>
+    </div>
+  </section>
+</div>
+
+<!-- Author -->
+<div id="author">
+  <section>
+    <div class="section-tag">The Creator</div>
+    <h2>Made by <em>Kija</em></h2>
+    <div class="author-inner">
+      <div class="author-avatar">K</div>
+      <div class="author-info">
+        <h3>Kija <em>Maharjan</em></h3>
+        <div class="author-role">Fullstack Developer · UI Designer · Kathmandu, Nepal</div>
+        <p class="author-bio">A self-motivated developer with 5+ years of experience building websites, POS systems, and open source tools. Key Sound started as a personal project to make every keystroke more satisfying.</p>
+        <div class="author-links">
+          <a href="https://kijamaharjan.xyz" target="_blank" class="author-link">🌐 Website</a>
+          <a href="https://github.com/Kija-Maharjan" target="_blank" class="author-link">GitHub</a>
+          <a href="mailto:kija@example.com" class="author-link">✉️ Email</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="footer-logo">Key <span>Sound</span></div>
+  <div style="color:var(--sub);font-size:12px;">© 2025 Kija Maharjan · Open Source · GPL-2.0</div>
+  <div class="footer-links">
+    <a href="#downloads">Download</a>
+    <a href="#docs">Docs</a>
+    <a href="#reviews">Reviews</a>
+    <a href="https://github.com/Kija-Maharjan" target="_blank">GitHub</a>
+  </div>
+</footer>
+
+<script>
+  function playSound(folder) {
+    const numFiles = 3; // assume 3 sound files per folder
+    const randomIndex = Math.floor(Math.random() * numFiles) + 1;
+    const audio = new Audio(`sound/${folder}/${folder}_${randomIndex}.wav`);
+    audio.play();
+  }
+
+  // ════════════════════════════════════════
+  // 🔧 REPLACE THESE WITH YOUR SUPABASE KEYS
+  // Go to: supabase.com → Project → Settings → API
+  // ════════════════════════════════════════
+  const SUPABASE_URL     = 'https://YOUR_PROJECT_ID.supabase.co';
+  const SUPABASE_ANON_KEY = 'YOUR_ANON_PUBLIC_KEY';
+  // ════════════════════════════════════════
+
+  const { createClient } = supabase;
+  const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let starValue = 0;
+  let npsValue  = null;
+
+  function switchTab(btn, name) {
+    document.querySelectorAll('.review-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.review-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function setStar(val) {
+    starValue = val;
+    document.querySelectorAll('.star-btn').forEach((b, i) => {
+      b.classList.toggle('active', i < val);
+    });
+  }
+
+  function setNps(btn, val) {
+    npsValue = val;
+    document.querySelectorAll('.nps-btn').forEach((b, i) => b.classList.toggle('active', i === val));
+  }
+
+  function showMsg(id, type, text) {
+    const el = document.getElementById(id);
+    el.className = 'form-msg ' + type;
+    el.textContent = text;
+    setTimeout(() => { el.className = 'form-msg'; }, 6000);
+  }
+
+  async function submitReview(type, btn) {
+    const origText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    let payload = { type, created_at: new Date().toISOString() };
+
+    if (type === 'star') {
+      const name = document.getElementById('star-name').value.trim();
+      const body = document.getElementById('star-body').value.trim();
+      if (!starValue) { showMsg('star-msg','error','Please select a star rating.'); btn.disabled=false; btn.textContent=origText; return; }
+      if (!body)      { showMsg('star-msg','error','Please write a review.'); btn.disabled=false; btn.textContent=origText; return; }
+      payload = { ...payload, name: name || 'Anonymous', body, star_rating: starValue };
+    } else if (type === 'nps') {
+      const name = document.getElementById('nps-name').value.trim();
+      const body = document.getElementById('nps-body').value.trim();
+      if (npsValue === null) { showMsg('nps-msg','error','Please select a score.'); btn.disabled=false; btn.textContent=origText; return; }
+      payload = { ...payload, name: name || 'Anonymous', body: body || null, nps_score: npsValue };
+    } else {
+      const name = document.getElementById('text-name').value.trim();
+      const body = document.getElementById('text-body').value.trim();
+      if (!body) { showMsg('text-msg','error','Please write a comment.'); btn.disabled=false; btn.textContent=origText; return; }
+      payload = { ...payload, name: name || 'Anonymous', body };
+    }
+
+    const { error } = await db.from('reviews').insert([payload]);
+
+    if (error) {
+      showMsg(type+'-msg', 'error', '❌ ' + error.message);
+    } else {
+      showMsg(type+'-msg', 'success', '✅ Thank you! Your review has been saved.');
+      if (type==='star')  { document.getElementById('star-name').value=''; document.getElementById('star-body').value=''; starValue=0; document.querySelectorAll('.star-btn').forEach(b=>b.classList.remove('active')); }
+      if (type==='nps')   { document.getElementById('nps-name').value=''; document.getElementById('nps-body').value=''; npsValue=null; document.querySelectorAll('.nps-btn').forEach(b=>b.classList.remove('active')); }
+      if (type==='text')  { document.getElementById('text-name').value=''; document.getElementById('text-body').value=''; }
+      loadReviews();
+    }
+    btn.disabled = false;
+    btn.textContent = origText;
+  }
+
+  async function loadReviews() {
+    const container = document.getElementById('reviews-container');
+    const countEl   = document.getElementById('review-count');
+    const { data, error } = await db.from('reviews').select('*').order('created_at', { ascending: false }).limit(50);
+    if (error || !data) { container.innerHTML = '<div class="reviews-empty">Could not load reviews.</div>'; return; }
+    countEl.textContent = data.length + ' review' + (data.length !== 1 ? 's' : '');
+    if (!data.length) { container.innerHTML = '<div class="reviews-empty">No reviews yet — be the first! ⭐</div>'; return; }
+    container.innerHTML = data.map(r => {
+      const date = new Date(r.created_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
+      const stars = r.star_rating ? '★'.repeat(r.star_rating)+'☆'.repeat(5-r.star_rating) : '';
+      const npsLabel = (r.nps_score !== null && r.nps_score !== undefined) ? `<div class="review-nps-badge">NPS ${r.nps_score}/10</div>` : '';
+      const typeMap = { star:'⭐ Star Review', nps:'📊 NPS', text:'💬 Comment' };
+      return `<div class="review-card">
+        <div class="review-card-top">
+          <div>
+            <div class="reviewer-name">${esc(r.name||'Anonymous')}</div>
+            ${stars ? `<div class="review-stars">${stars}</div>` : ''}
+            ${npsLabel}
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+            <span class="review-type-badge">${typeMap[r.type]||r.type}</span>
+            <span class="review-date">${date}</span>
+          </div>
+        </div>
+        ${r.body ? `<div class="review-body">${esc(r.body)}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  loadReviews();
+</script>
+</body>
+</html>
