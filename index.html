@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root {
       --black:   #080808;
@@ -146,19 +147,49 @@
     /* ══ DONATE ══ */
     #donate { border-top: 1px solid var(--border); text-align: center; }
     #donate section { display: flex; flex-direction: column; align-items: center; }
-    .donate-box { margin-top: 52px; background: var(--card); border: 1px solid rgba(201,168,76,0.2); border-radius: 16px; padding: 52px 60px; max-width: 680px; width: 100%; position: relative; overflow: hidden; }
-    .donate-box::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 60%); pointer-events: none; }
-    .donate-icon { font-size: 48px; margin-bottom: 20px; }
-    .donate-box h3 { font-family: var(--serif); font-size: 32px; font-weight: 300; color: var(--white); margin-bottom: 12px; }
-    .donate-box h3 em { font-style: italic; color: var(--gold); }
-    .donate-box p { color: var(--sub); font-size: 15px; margin-bottom: 32px; max-width: 420px; margin-left: auto; margin-right: auto; }
-    .qr-wrap { background: #fff; border-radius: 12px; padding: 16px; display: inline-block; margin: 0 auto 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
-    .qr-wrap img { width: 220px; height: auto; display: block; border-radius: 4px; }
-    .bank-info { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(201,168,76,0.06); border: 1px solid rgba(201,168,76,0.15); border-radius: 8px; padding: 14px 28px; margin-top: 4px; }
-    .bank-name-label { font-family: var(--mono); font-size: 11px; color: var(--sub); letter-spacing: 0.12em; text-transform: uppercase; }
-    .bank-account-name { font-family: var(--serif); font-size: 20px; color: var(--white); font-weight: 400; }
-    .bank-account-num { font-family: var(--mono); font-size: 13px; color: var(--gold); letter-spacing: 0.06em; }
-    .donate-note { margin-top: 20px; font-size: 12px; color: var(--sub); font-family: var(--mono); }
+
+    /* ── biplop_bank_qr card (embedded from biplop_bank_qr.html) ── */
+    .bq-card {
+      background: #111010; border: 1px solid rgba(201,168,76,0.2);
+      width: 340px; padding: 36px 28px 32px; position: relative;
+      box-shadow: 0 0 80px rgba(201,168,76,0.07), 0 24px 60px rgba(0,0,0,0.6);
+      margin-top: 52px;
+    }
+    .bq-card::before { content:''; position:absolute; top:-1px;    left:-1px;  width:20px; height:20px; border-top:2px solid var(--gold); border-left:2px solid var(--gold); }
+    .bq-card::after  { content:''; position:absolute; top:-1px;    right:-1px; width:20px; height:20px; border-top:2px solid var(--gold); border-right:2px solid var(--gold); }
+    .bq-corner-bl { position:absolute; bottom:-1px; left:-1px;  width:20px; height:20px; border-bottom:2px solid var(--gold); border-left:2px solid var(--gold); }
+    .bq-corner-br { position:absolute; bottom:-1px; right:-1px; width:20px; height:20px; border-bottom:2px solid var(--gold); border-right:2px solid var(--gold); }
+    .bq-noise { position:absolute; inset:0; pointer-events:none; z-index:1; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"); opacity:0.35; }
+    .bq-inner { position:relative; z-index:2; }
+    .bq-tag { font-family:var(--mono); font-size:7px; letter-spacing:4px; text-transform:uppercase; color:var(--gold); margin-bottom:18px; opacity:0.8; }
+    .bq-name { font-family:var(--serif); font-size:26px; font-weight:300; color:var(--white); letter-spacing:-0.3px; line-height:1; margin-bottom:3px; }
+    .bq-name em { font-style:italic; color:var(--gold); }
+    .bq-bank-line { font-family:var(--mono); font-size:8px; letter-spacing:2.5px; text-transform:uppercase; color:rgba(200,196,188,0.45); margin-bottom:24px; }
+    .bq-divider { height:1px; background:linear-gradient(to right,transparent,rgba(201,168,76,0.35),transparent); margin-bottom:24px; }
+    .bq-qr-outer { display:flex; align-items:center; justify-content:center; margin-bottom:24px; }
+    .bq-qr-box { background:#111010; padding:14px; position:relative; display:inline-block; }
+    .bq-qr-box::before { content:''; position:absolute; top:-1px;    left:-1px;  width:14px; height:14px; border-top:2px solid var(--gold); border-left:2px solid var(--gold); }
+    .bq-qr-box::after  { content:''; position:absolute; top:-1px;    right:-1px; width:14px; height:14px; border-top:2px solid var(--gold); border-right:2px solid var(--gold); }
+    .bq-qc-bl { position:absolute; bottom:-1px; left:-1px;  width:14px; height:14px; border-bottom:2px solid var(--gold); border-left:2px solid var(--gold); }
+    .bq-qc-br { position:absolute; bottom:-1px; right:-1px; width:14px; height:14px; border-bottom:2px solid var(--gold); border-right:2px solid var(--gold); }
+    #bq-qrcode canvas { display:block; filter:invert(1) sepia(1) saturate(3) hue-rotate(5deg) brightness(0.88); }
+    .bq-acct-block { margin-bottom:24px; }
+    .bq-acct-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(201,168,76,0.08); }
+    .bq-acct-row:last-child { border-bottom:none; }
+    .bq-acct-label { font-family:var(--mono); font-size:7px; letter-spacing:2.5px; text-transform:uppercase; color:rgba(200,196,188,0.4); }
+    .bq-acct-value { font-family:var(--serif); font-size:15px; color:var(--white); font-weight:400; }
+    .bq-acct-value.mono { font-family:var(--mono); font-size:12px; color:var(--gold); letter-spacing:2px; font-weight:500; }
+    .bq-bottom { display:flex; align-items:center; justify-content:space-between; padding-top:18px; border-top:1px solid rgba(201,168,76,0.1); }
+    .bq-scan-label { font-family:var(--mono); font-size:7px; letter-spacing:3px; text-transform:uppercase; color:rgba(200,196,188,0.35); margin-bottom:5px; }
+    .bq-logo { display:flex; align-items:center; gap:7px; }
+    .bq-logo-diamond { width:18px; height:18px; background:var(--gold); transform:rotate(45deg); flex-shrink:0; position:relative; }
+    .bq-logo-diamond::after { content:'S'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#111010; font-family:var(--serif); font-size:11px; font-weight:600; transform:rotate(-45deg); font-style:italic; }
+    .bq-logo-text { font-family:var(--serif); font-size:14px; color:var(--white); }
+    .bq-logo-text span { color:var(--gold); }
+    .bq-share-note { text-align:center; margin-top:18px; font-family:var(--mono); font-size:7px; letter-spacing:2px; text-transform:uppercase; color:rgba(200,196,188,0.25); }
+    .bq-print-btn { display:block; width:340px; margin:14px auto 0; padding:12px; background:transparent; border:1px solid rgba(201,168,76,0.3); color:var(--gold); font-family:var(--mono); font-size:8px; letter-spacing:3px; text-transform:uppercase; cursor:pointer; transition:all 0.3s; }
+    .bq-print-btn:hover { background:rgba(201,168,76,0.08); border-color:var(--gold); }
+    .bq-donate-note { margin-top:20px; font-size:12px; color:var(--sub); font-family:var(--mono); text-align:center; line-height:1.8; }
 
     /* Author */
     #author { border-top: 1px solid var(--border); }
@@ -498,25 +529,76 @@
   </section>
 </div>
 
-<!-- ══ DONATE — Siddhartha Bank QR ══ -->
+<!-- ══ DONATE — biplop_bank_qr.html embedded ══ -->
 <div id="donate">
   <section style="display:flex;flex-direction:column;align-items:center;">
     <div class="section-tag" style="margin:0 auto;">Support the Project</div>
     <h2 style="text-align:center;">Support via <em>Bank Transfer</em></h2>
-    <div class="donate-box">
-      <div class="donate-icon">🏦</div>
-      <h3>Enjoyed Key <em>Sound?</em></h3>
-      <p>This project is free and open source. If it made your typing more fun, a small contribution goes a long way — scan the QR with any Nepali banking app.</p>
-      <div class="qr-wrap">
-        <img src="siddhartha-qr.jpeg" alt="Siddhartha Bank QR — Biplop Maharjan" />
+    <p style="color:var(--sub);font-size:15px;text-align:center;max-width:420px;margin-top:16px;line-height:1.7;">
+      This project is free and open source. If it made your typing more fun,
+      a small contribution goes a long way.
+    </p>
+
+    <!-- card from biplop_bank_qr.html -->
+    <div class="bq-card">
+      <div class="bq-noise"></div>
+      <div class="bq-corner-bl"></div>
+      <div class="bq-corner-br"></div>
+
+      <div class="bq-inner">
+        <div class="bq-tag">Bank Payment · Nepal</div>
+
+        <div class="bq-name">Biplop <em>Maharjan</em></div>
+        <div class="bq-bank-line">Siddhartha Gen-Z Saving Account</div>
+
+        <div class="bq-divider"></div>
+
+        <div class="bq-qr-outer">
+          <div class="bq-qr-box">
+            <div class="bq-qc-bl"></div>
+            <div class="bq-qc-br"></div>
+            <div id="bq-qrcode"></div>
+          </div>
+        </div>
+
+        <div class="bq-acct-block">
+          <div class="bq-acct-row">
+            <span class="bq-acct-label">Account No.</span>
+            <span class="bq-acct-value mono">5551 0583 765</span>
+          </div>
+          <div class="bq-acct-row">
+            <span class="bq-acct-label">Bank</span>
+            <span class="bq-acct-value">Siddhartha Bank</span>
+          </div>
+          <div class="bq-acct-row">
+            <span class="bq-acct-label">Account Type</span>
+            <span class="bq-acct-value">Gen-Z Saving</span>
+          </div>
+        </div>
+
+        <div class="bq-bottom">
+          <div>
+            <div class="bq-scan-label">Scan to pay</div>
+            <div class="bq-logo">
+              <div class="bq-logo-diamond"></div>
+              <div class="bq-logo-text">Siddhartha<span>Bank</span></div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:var(--mono);font-size:7px;letter-spacing:2px;text-transform:uppercase;color:rgba(200,196,188,0.3);margin-bottom:4px;">Primary</div>
+            <div style="width:28px;height:1px;background:rgba(201,168,76,0.4);margin-left:auto;"></div>
+          </div>
+        </div>
+
+        <div class="bq-share-note">Full Name · Bank Name · Account Number</div>
       </div>
-      <div class="bank-info">
-        <div class="bank-name-label">Siddhartha Bank · Gen-Z Saving Account</div>
-        <div class="bank-account-name">Biplop Maharjan</div>
-        <div class="bank-account-num">Account No: 55510583765</div>
-      </div>
-      <div class="donate-note">Scan with Siddhartha Bank app, eSewa, Khalti, or any QR payment app<br/>100% goes toward development &amp; new sounds</div>
     </div>
+
+    <button class="bq-print-btn" onclick="window.print()">🖨️ &nbsp; Print / Save as Image</button>
+    <p class="bq-donate-note">
+      Scan with Siddhartha Bank app, eSewa, Khalti, or any QR app<br/>
+      100% goes toward development &amp; new sounds ♥
+    </p>
   </section>
 </div>
 
@@ -672,6 +754,16 @@
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
   loadReviews();
+
+  // biplop_bank_qr — gold QR card in donate section
+  new QRCode(document.getElementById('bq-qrcode'), {
+    text: 'BIPLOP MAHARJAN|SIDDHARTHA BANK|55510583765',
+    width: 220,
+    height: 220,
+    colorDark:  '#c9a84c',
+    colorLight: '#111010',
+    correctLevel: QRCode.CorrectLevel.H,
+  });
 </script>
 </body>
 </html>
